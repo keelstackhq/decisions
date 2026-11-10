@@ -2,7 +2,7 @@
 
 - Date: 2026-11-03
 - Scope: all
-- Status: accepted
+- Status: accepted (amended 2026-11-10: owner approvals and provisioning gate per D-018)
 - Supersedes: —
 
 ## Context
@@ -18,7 +18,7 @@ chat form on 2026-11-02, and the security review tightened the provisioning gate
 - **Intake.** All upfront answers live in `.bosun/intake.toml` (a seed, checked by
   `bosun intake check`). Agents never ask the owner again what the intake already answers.
 - **Approval policy** is the intake answer `approvals`, written to `[approvals] policy`:
-  - `owner`: every gated PR needs an owner approval (chat form, D-012).
+  - `owner`: every gated PR needs an owner approval (chat yes recorded by the orchestrator, D-018).
   - `owner-gated` (recommended): the orchestrator approves low-risk and R-ci PRs after green checks
     and an independent review of that head; the owner approves R-gov, `.bosun/**`, approval code,
     workflows, secrets and releases.
@@ -30,11 +30,12 @@ chat form on 2026-11-02, and the security review tightened the provisioning gate
   owner-class. Releases follow D-015: the orchestrator starts them, the owner taps `release`.
 - **Provisioning.** Repos are created and configured only by the org provisioner GitHub App, run by
   `provision.yml` in keelstackhq/provision. Its `provision` environment deploys from `main` only.
-  The workflow refuses an intake unless `bosun intake verify` accepts its detached signature:
-  orchestrator key, bound to repo, mode, nonce, issued time, an expiry of at most one hour, and the
-  intake's sha256; a used nonce is refused. The orchestrator signs only on an owner form answer
-  that names that repo and mode, and its private key stays in its own session (never in a shared
-  environment, setup script, repo or worker). `new` only creates; `adopt` only adds settings and
+  The workflow refuses an intake unless `bosun intake verify` accepts the orchestrator's record of
+  the owner's chat yes (D-018), bound to repo, mode, nonce, issued time, an expiry of at most one
+  hour, and the intake's sha256; a used nonce is refused. The orchestrator records it only on an
+  owner chat answer that names that repo and mode. A detached signature is optional and stronger;
+  if used, its private key stays in the orchestrator's own session (never in a shared environment,
+  setup script, repo or worker). `new` only creates; `adopt` only adds settings and
   never loosens one; protected repos (decisions, provision, bosun, hull, splice, hoist, hoard,
   berth) and repos that already have `.bosun/` are refused.
 - **Secrets** are environment secrets in the environments of the jobs that read them (hoist
